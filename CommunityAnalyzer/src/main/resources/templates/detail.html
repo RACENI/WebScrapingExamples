@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inven Detail</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont,
+                         "Segoe UI", Roboto, Arial, sans-serif;
+            background: #fafafa;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        /* ===== 본문 ===== */
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .article-content {
+            line-height: 1.6;
+            word-break: break-word;
+            background: #fff;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+
+        /* ===== 댓글 공통 ===== */
+        .comment-wrapper {
+            max-width: 900px;
+            margin: 40px auto 0;
+        }
+
+        .comment-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+
+        .comment-section h3 {
+            margin: 0 0 16px;
+            font-size: 18px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .comment-item {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .comment-writer {
+            font-weight: bold;
+            color: #222;
+        }
+
+        .comment-like {
+            color: #d9534f;
+            font-size: 13px;
+        }
+
+        .comment-dislike {
+            color: #337ab7;
+            font-size: 13px;
+        }
+
+        .comment-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        /* ===== 베스트 강조 ===== */
+        .best .comment-item {
+            background: #fff8e1;
+            padding: 12px;
+            border-radius: 4px;
+        }
+		
+		.comment-item.reply {
+		    margin-left: 30px;
+		    padding-left: 12px;
+		    border-left: 3px solid #ddd;
+		    background: #f9f9f9;
+		}
+
+		.comment-item.reply::before {
+		    content: "↳";
+		    margin-right: 6px;
+		    color: #999;
+		}
+		
+		.comment-item.blind {
+		    background: #fff3f3;
+		    border-left: 4px solid #d9534f;
+		}
+
+		.comment-item.blind::before {
+		    content: "🚫 블라인드 댓글";
+		    display: block;
+		    font-size: 12px;
+		    color: #d9534f;
+		    margin-bottom: 4px;
+		}
+		
+		.comment-section {
+		    max-height: 800px;
+		    overflow-y: auto;
+		}
+
+		/* =====================
+		   다크모드 변수
+		   ===================== */
+		:root {
+		    --bg-body: #fafafa;
+		    --bg-card: #ffffff;
+		    --text-main: #222;
+		    --text-sub: #555;
+		    --border-color: #e0e0e0;
+
+		    --best-bg: #fff8e1;
+		    --reply-bg: #f9f9f9;
+		    --blind-bg: #fff3f3;
+		}
+
+		/* 다크모드 */
+		body.dark {
+		    --bg-body: #121212;
+		    --bg-card: #1e1e1e;
+		    --text-main: #e6e6e6;
+		    --text-sub: #aaaaaa;
+		    --border-color: #333;
+
+		    --best-bg: #2a250f;
+		    --reply-bg: #252525;
+		    --blind-bg: #3a1f1f;
+		}
+
+		/* =====================
+		   공통 적용
+		   ===================== */
+		body {
+		    background: var(--bg-body);
+		    color: var(--text-main);
+		}
+
+		.article-content,
+		.comment-section {
+		    background: var(--bg-card);
+		    color: var(--text-main);
+		}
+
+		.comment-item {
+		    border-bottom: 1px solid var(--border-color);
+		}
+
+		.comment-writer {
+		    color: var(--text-main);
+		}
+
+		.comment-content {
+		    color: var(--text-main);
+		}
+
+		/* ===== 베스트 댓글 ===== */
+		.best .comment-item {
+		    background: var(--best-bg);
+		}
+
+		/* ===== 대댓글 ===== */
+		.comment-item.reply {
+		    background: var(--reply-bg);
+		    border-left-color: var(--border-color);
+		}
+
+		/* ===== 블라인드 댓글 ===== */
+		.comment-item.blind {
+		    background: var(--blind-bg);
+		    border-left-color: #d9534f;
+		}
+
+		/* 링크 */
+		a {
+		    color: var(--text-main);
+		}
+
+    </style>
+</head>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+	    const btn = document.getElementById("darkToggle");
+	    if (!btn) return; // 안전장치
+
+	    const body = document.body;
+
+	    // 이전 설정 복원
+	    if (localStorage.getItem("darkMode") === "on") {
+	        body.classList.add("dark");
+	        btn.innerText = "☀️";
+	    }
+
+	    btn.addEventListener("click", () => {
+	        body.classList.toggle("dark");
+
+	        const isDark = body.classList.contains("dark");
+	        btn.innerText = isDark ? "☀️" : "🌙";
+	        localStorage.setItem("darkMode", isDark ? "on" : "off");
+	    });
+	});
+</script>
+
+<body>
+<button id="darkToggle"
+        style="
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 999;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        ">
+    🌙
+</button>
+
+<a href="javascript:history.back()">← 목록으로</a>
+<hr>
+
+<!-- =====================
+     본문
+     ===================== -->
+<div class="content-wrapper">
+    <div class="article-content"
+         th:utext="${content}">
+    </div>
+</div>
+
+<!-- =====================
+     댓글 영역
+     ===================== -->
+<div class="comment-wrapper">
+
+    <!-- 베스트 댓글 -->
+    <div class="comment-section best"
+         th:if="${bestComments != null and !bestComments.isEmpty()}">
+        <h3>🔥 베스트 댓글</h3>
+
+        <div class="comment-item"
+             th:each="c : ${bestComments}">
+            <div class="comment-header">
+                <span class="comment-writer"
+                      th:text="${c.writer}">작성자</span>
+                <span class="comment-like">
+                    👍 <span th:text="${c.like}">0</span>
+                </span>
+                <span class="comment-dislike">
+                    👎 <span th:text="${c.dislike}">0</span>
+                </span>
+            </div>
+            <div class="comment-content"
+                 th:text="${c.content}">
+                댓글 내용
+            </div>
+        </div>
+    </div>
+
+    <!-- 일반 댓글 -->
+    <div class="comment-section"
+         th:if="${comments != null and !comments.isEmpty()}">
+		<h3>🧵 댓글 (<span th:text="${comments.size()}">0</span>)</h3>
+
+        <div class="comment-item"
+             th:each="c : ${comments}"
+			 th:class="|comment-item
+			                 ${c.depth == 1 ? ' reply' : ''}
+			                 ${c.blind ? ' blind' : ''}|">
+            <div class="comment-header">
+                <span class="comment-writer"
+                      th:text="${c.writer}">작성자</span>
+                <span class="comment-like">
+                    👍 <span th:text="${c.like}">0</span>
+                </span>
+                <span class="comment-dislike">
+                    👎 <span th:text="${c.dislike}">0</span>
+                </span>
+            </div>
+            <div class="comment-content"
+                 th:text="${c.content}">
+                댓글 내용
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

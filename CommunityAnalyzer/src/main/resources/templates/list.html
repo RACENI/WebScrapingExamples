@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<style>
+	/* =====================
+	   다크모드 변수
+	   ===================== */
+	:root {
+	    --bg-body: #fafafa;
+	    --bg-card: #ffffff;
+	    --text-main: #222;
+	    --text-sub: #555;
+	    --border-color: #e0e0e0;
+
+	    --best-bg: #fff8e1;
+	    --reply-bg: #f9f9f9;
+	    --blind-bg: #fff3f3;
+		
+		/* 🔗 링크 색상 */
+		--link-color: #1a0dab;        /* 기본 링크 (파랑) */
+		--link-visited: #6f42c1;      /* 방문한 링크 (보라) */
+	}
+
+	/* 다크모드 */
+	body.dark {
+	    --bg-body: #121212;
+	    --bg-card: #1e1e1e;
+	    --text-main: #e6e6e6;
+	    --text-sub: #aaaaaa;
+	    --border-color: #333;
+
+	    --best-bg: #2a250f;
+	    --reply-bg: #252525;
+	    --blind-bg: #3a1f1f;
+		
+		/* 🔗 다크모드 링크 */
+		--link-color: #8ab4f8;        /* 연한 파랑 */
+		--link-visited: #c58af9;      /* 연한 보라 */
+	}
+
+	/* =====================
+	   공통 적용
+	   ===================== */
+	body {
+	    background: var(--bg-body);
+	    color: var(--text-main);
+	}
+
+	.article-content,
+	.comment-section {
+	    background: var(--bg-card);
+	    color: var(--text-main);
+	}
+
+	.comment-item {
+	    border-bottom: 1px solid var(--border-color);
+	}
+
+	.comment-writer {
+	    color: var(--text-main);
+	}
+
+	.comment-content {
+	    color: var(--text-main);
+	}
+
+	/* ===== 베스트 댓글 ===== */
+	.best .comment-item {
+	    background: var(--best-bg);
+	}
+
+	/* ===== 대댓글 ===== */
+	.comment-item.reply {
+	    background: var(--reply-bg);
+	    border-left-color: var(--border-color);
+	}
+
+	/* ===== 블라인드 댓글 ===== */
+	.comment-item.blind {
+	    background: var(--blind-bg);
+	    border-left-color: #d9534f;
+	}
+
+	/* 링크 */
+	a {
+	    color: var(--link-color);
+	    text-decoration: none;
+	}
+
+	a:visited {
+	    color: var(--link-visited);
+	}
+
+	a:hover {
+	    text-decoration: underline;
+	}
+
+</style>
+</head>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+	    const btn = document.getElementById("darkToggle");
+	    if (!btn) return; // 안전장치
+
+	    const body = document.body;
+
+	    // 이전 설정 복원
+	    if (localStorage.getItem("darkMode") === "on") {
+	        body.classList.add("dark");
+	        btn.innerText = "☀️";
+	    }
+
+	    btn.addEventListener("click", () => {
+	        body.classList.toggle("dark");
+
+	        const isDark = body.classList.contains("dark");
+	        btn.innerText = isDark ? "☀️" : "🌙";
+	        localStorage.setItem("darkMode", isDark ? "on" : "off");
+	    });
+	});
+</script>
+<body>
+<button id="darkToggle"
+        style="
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 999;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        ">
+    🌙
+</button>
+
+<h2>게시글 목록</h2>
+
+<ul>
+    <li th:each="p : ${posts}">
+        <a th:href="@{/inven/detail(url=${p.url})}"
+           th:text="${p.title}"></a>
+    </li>
+</ul>
+
+<hr>
+
+<a th:if="${page > 1}" th:href="@{/inven(page=${page-1})}">이전</a>
+&nbsp;
+<a th:href="@{/inven(page=${page+1})}">다음</a>
+
+</body>
+</html>
