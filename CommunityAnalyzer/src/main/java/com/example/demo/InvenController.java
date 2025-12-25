@@ -345,7 +345,7 @@ public class InvenController {
             // 안전장치
             if (loop > 20) break;
         }
-
+ 
         return "DONE (check json files)";
     }
 }
